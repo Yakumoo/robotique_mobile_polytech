@@ -81,7 +81,7 @@ std::vector<PhPointD<2>> RRT::build(PhPointD<2> start, PhPointD<2> goal, bool(*c
   treeG_.clear(); treeG_.insert(goal , goal); lastG_=goal;
   // check
   if (collision(start) || collision(goal) || connection(start, goal))
-    return std::vector<PhPointD<2>>(); // empty
+    return std::vector<PhPointD<2>>{start, goal}; // empty
   // start loop
   PhPointD<2> r=RANDCONF;
   while (cond()){
@@ -109,7 +109,7 @@ std::vector<PhPointD<2>> RRT::connect(PhPointD<2> start, PhPointD<2> goal, bool(
   treeG_.clear(); treeG_.insert(goal , goal); lastG_=goal;
 
   if (collision(start) || collision(goal) || connection(start, goal))
-    return std::vector<PhPointD<2>>(); // empty
+    return std::vector<PhPointD<2>>{start, goal}; // empty
 
   PhPointD<2> r=RANDCONF;
   while (cond()){
@@ -272,11 +272,12 @@ std::vector<PhPointD<2>> RRT::solve_quadratic_bezier_path(std::vector<PhPointD<2
 
 std::vector<PhPointD<2>> RRT::safe_quadratic_bezier_path(std::vector<PhPointD<2>> path){
   // TODO: optimization: reduce points with mean, crossover, both ...
+  if (path.size()==0) return path;
   double max_dist, dist;
   int i;
   std::vector<PhPointD<2>>::iterator max_it;
   std::vector<PhPointD<2>> new_path = solve_quadratic_bezier_path(path);
-  for (i = 1; i < path.size(); i+=2){
+  for (i = 1; i < path.size()-1; i++){
     if (!connection_quadratic_bezier(new_path[2*i-2], new_path[2*i-1], new_path[2*i])){
       max_dist=0;
       for (int j = std::max(0,i-2); j < std::min<int>(path.size()-1,i+2); j++) { // try neighbors
@@ -295,9 +296,6 @@ std::vector<PhPointD<2>> RRT::safe_quadratic_bezier_path(std::vector<PhPointD<2>
 
   #ifdef OPENCV
     if(image_.empty()) image_ = cvMap(path[0], path[path.size()-1]);
-    for (int i = 0; i < path.size(); i++) {
-      cv::line(image_, cv::Point(CONT2DISC(path[i])), cv::Point(CONT2DISC(path[i-1])), cv::Scalar(150), 2);
-    }
     for (const auto & e : new_path){
       cv::circle(image_, cv::Point(CONT2DISC(e)), 1, cv::Scalar(120), 20);
     }
@@ -321,7 +319,7 @@ std::vector<PhPointD<2>> RRT::safe_quadratic_bezier_path(std::vector<PhPointD<2>
 }
 
 bool RRT::collision_path_quadratic_bezier(std::vector<PhPointD<2>> path){
-  for (int i = 1; i < path.size()-1; i+=2)
+  for (int i = 1; i < path.size(); i+=2)
     if (!connection_quadratic_bezier(path[i-1], path[i], path[i+1]))
       return true;
   return false;
