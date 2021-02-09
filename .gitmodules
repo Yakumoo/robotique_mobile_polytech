@@ -1,0 +1,3 @@
+[submodule "src/phtree-cpp"]
+	path = src/phtree-cpp
+	url = https://github.com/improbable-eng/phtree-cpp.git

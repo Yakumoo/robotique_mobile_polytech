@@ -1,0 +1,31 @@
+<launch>
+
+
+<include file="$(find minilab_simulation)/launch/minilab_simulation.launch" >
+	<arg name="gui" value="false" />
+</include>
+
+<!--TeleOperation-->
+<include file="$(find ds4_driver)/launch/ds4_twist.launch">
+	<arg name="dof" value="2" />
+</include>
+<param name="/ds4_twist/scales/angular/z" value="2" />
+<param name="/ds4_twist/scales/linear/x" value="3" />
+
+<node pkg="teleop_twist_keyboard" name="teleop" type="teleop_twist_keyboard.py" output="screen"/>
+
+<!--Slam-->
+<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen" args="scan:=scan">
+	<param name="delta" value="0.025" />
+  <param name="xmin" value="-20" />
+  <param name="xmax" value="20" />
+  <param name="ymin" value="-20" />
+  <param name="ymax" value="20" />
+</node>
+
+<!--RViz-->
+<node pkg="rviz" type="rviz" name="rviz_slam" output="screen" args="-d $(find robotique_mobile_polytech)/rviz/slam.rviz">
+</node>
+
+
+</launch>

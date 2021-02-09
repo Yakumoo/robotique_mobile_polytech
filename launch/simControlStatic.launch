@@ -1,0 +1,25 @@
+<launch>
+<!--Static Map-->
+<node pkg="map_server" type="map_server" name="map_server" args="$(find minilab_simulation)/map/buvette.yaml"/>
+
+<!--Simulation and visualization-->
+<include file="$(find minilab_simulation)/launch/minilab_simulation.launch" >
+	<arg name="gui" value="false" />
+</include>
+<node pkg="rviz" type="rviz" name="rviz_slam" output="screen" args="-d $(find robotique_mobile_polytech)/rviz/slam.rviz">
+</node>
+
+<!--Slam-->
+<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen" args="scan:=scan">
+	<param name="delta" value="0.025" />
+  <param name="xmin" value="-20" />
+  <param name="xmax" value="20" />
+  <param name="ymin" value="-20" />
+  <param name="ymax" value="20" />
+</node>
+
+<!--Test the control on static map-->
+<node pkg="robotique_mobile_polytech" name="map_reader" type="command_node" output="screen">
+  <param name="enable_static_map" type="bool" value="true" />
+</node>
+</launch>

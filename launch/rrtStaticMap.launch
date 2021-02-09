@@ -1,0 +1,12 @@
+<launch>
+<!--Static Map-->
+<node pkg="map_server" type="map_server" name="map_server" args="$(find minilab_simulation)/map/buvette.yaml">
+  <!--rosparam param="origin">[-29.8, -11.6, 0]</rosparam-->
+</node>
+
+<!--Show the map-->
+<!--node pkg="rb_projet" name="map_reader" type="map.py" output="screen" args="-static_map"/-->
+<node pkg="robotique_mobile_polytech" name="map_reader" type="static_map_node" output="screen">
+</node>
+
+</launch>
