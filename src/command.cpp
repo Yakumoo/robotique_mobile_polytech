@@ -47,9 +47,9 @@ void Command_node::follow_quadratic_bezier_path(std::vector<std::array<double,2>
   tf::TransformListener listener;
   tf::StampedTransform transform;
 
-  std::array<double, 2> v, p, beginning=qb2(path[0],path[1],path[2], 0.1), projection, normal, z;
+  std::array<double, 2> v, p, projection, normal=qbp2(path[0],path[1],path[2], 0);
   int i=1;
-  double l=0.3, roll, pitch, yaw, k=0.1, angle, t, tn, norm, d;
+  double l=0.3, roll, pitch, yaw, k=0.1, angle = std::atan2(normal[1], normal[0]), t, tn, norm, d;
   std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now(), now=std::chrono::steady_clock::now();
   vel_msg_.linear.x = 0;
   // let the robot orientate for 2s
@@ -57,7 +57,6 @@ void Command_node::follow_quadratic_bezier_path(std::vector<std::array<double,2>
     now=std::chrono::steady_clock::now();
     try{
       listener.lookupTransform("map", "base_footprint", ros::Time(0), transform);
-      angle = std::atan2(beginning[1]-transform.getOrigin().y(), beginning[0]-transform.getOrigin().x());
       transform.getBasis().getRPY(roll, pitch, yaw);
       vel_msg_.angular.z = 2*(angle - yaw);
       velocity_publisher_.publish(vel_msg_);
@@ -74,7 +73,7 @@ void Command_node::follow_quadratic_bezier_path(std::vector<std::array<double,2>
       p[0] = transform.getOrigin().x()+l*std::cos(yaw); // point p
       p[1] = transform.getOrigin().y()+l*std::sin(yaw);
       tn = opqbcata(path[i-1], path[i], path[i+1], p);
-      if (tn > -0.05 && tn <= 1.05) {
+      if (tn > -0.05 && tn < 1.05) {
         t = tn;
         projection = qb2(path[i-1], path[i], path[i+1], t);
         normal = qbp2(path[i-1], path[i], path[i+1], t); // this is actually the tangent
@@ -85,8 +84,8 @@ void Command_node::follow_quadratic_bezier_path(std::vector<std::array<double,2>
         vel_msg_.linear.x = 1; // set the speed here
         vel_msg_.angular.z = - (std::tan(angle)/l + k*d/std::cos(angle)) * vel_msg_.linear.x;
         if (i<path.size()-2
-            && (tn = opqbcata(path[i+1], path[i+2], path[i+3], p))> -0.05
-            && tn<=1
+            && (tn = opqbcata(path[i+1], path[i+2], path[i+3], p)) > -0.05
+            && tn <= 1
             && dist2(p, qb2(path[i+1], path[i+2], path[i+3], tn)) < std::abs(d)){ // compute again the distance to compare
           i+=2; // we are closer to the next curve so we increment
           continue;
