@@ -227,8 +227,10 @@ std::vector<PhPointD<2>> RRT::forward(std::vector<PhPointD<2>> path, PhPointD<2>
 std::vector<PhPointD<2>> RRT::solve_quadratic_bezier_path(std::vector<PhPointD<2>> path){
   //https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
   // a=1/6, b=1, c=1/6, d=2*(path[i]+path[i+1])/3, w=1/6
-  if (path.size() < 3) {
+  if (path.size() < 2) {
     return path;
+  }else if (path.size() == 2){
+    return std::vector<PhPointD<2>> {path[0], {(path[0][0]+path[1][0])/2, (path[0][1]+path[1][1])/2}, path[1]};
   }else if (path.size() == 3){
     return std::vector<PhPointD<2>> {path[0],
     {2*path[1][0] - (path[0][0]+path[2][0])/2, 2*path[1][1] - (path[0][1]+path[2][1])/2},
@@ -330,7 +332,7 @@ bool RRT::connection_quadratic_bezier(PhPointD<2> start, PhPointD<2> control, Ph
   double t=1, tinter;
   PhPoint<2> test;
   PhPointD<2> testD;
-  for (double splitSize = length_quadratic_bezier(start, control, end)/res_ ; splitSize>0.5; splitSize/=2) {
+  for (double splitSize = length_quadratic_bezier(start, control, end)/res_ ; splitSize>2; splitSize/=2) {
     for (i = 0; i < split; i++) {
       tinter = t/2 + t*i;
       testD = QB(start, control, end, tinter);

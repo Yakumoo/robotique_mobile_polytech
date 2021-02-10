@@ -53,7 +53,7 @@ void Command_node::follow_quadratic_bezier_path(std::vector<std::array<double,2>
   std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now(), now=std::chrono::steady_clock::now();
   vel_msg_.linear.x = 0;
   // let the robot orientate for 2s
-  for (ros::Rate rate(20); ok() && std::chrono::duration_cast<std::chrono::duration<double>>(now - begin).count()<3; rate.sleep()) {
+  for (ros::Rate rate(20); ok() && std::chrono::duration_cast<std::chrono::duration<double>>(now - begin).count()<2; rate.sleep()) {
     now=std::chrono::steady_clock::now();
     try{
       listener.lookupTransform("map", "base_footprint", ros::Time(0), transform);
